@@ -29,15 +29,21 @@ var testDir = 'test';
 
 gulp.task('watch', function () {
   gulp.watch([srcDir + '/**/*.js', testDir + '/**/*.js', srcDir + '/**/*.tsx',  srcDir + '/**/*.ts', 'gulpfile.js'],
-    ['tsc', 'standard', 'test']);
+    ['tsc', 'eslint', 'test']);
 });
 
+
+var makeToken = require('./src/makeToken.js');
+
+gulp.task('makeToken' , function() {
+  makeToken.run();
+});
 /**
  * compile tsc (including srcmaps)
  * @input srcDir
  * @output genDir
  */
-gulp.task('tsc', function () {
+gulp.task('tsc', ['makeToken'], function () {
   var tsProject = ts.createProject('tsconfig.json', { inlineSourceMap: true
   });
   var tsResult = tsProject.src() // gulp.src('lib/*.ts')
@@ -226,7 +232,7 @@ gulp.task('test', ['tsc'], function () {
 
 const eslint = require('gulp-eslint');
 
-gulp.task('standard', () => {
+gulp.task('eslint', () => {
   // ESLint ignores files with "node_modules" paths.
   // So, it's best to have gulp ignore the directory as well.
   // Also, Be sure to return the stream from the task;
@@ -245,5 +251,5 @@ gulp.task('standard', () => {
 
 
 // Default Task
-gulp.task('default', ['tsc',  'standard', 'test', 'doc' ]);
-gulp.task('build', ['tsc', 'standard']);
+gulp.task('default', ['tsc',  'eslint', 'test', 'doc' ]);
+gulp.task('build', ['tsc', 'eslint']);
