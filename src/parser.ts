@@ -229,6 +229,11 @@ function SelectParser(input) {
         },
         {
           ALT: function () {
+            $.CONSUME(T.for);
+          }
+        },
+        {
+          ALT: function () {
             $.CONSUME(T.relating);
           }
         }

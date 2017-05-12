@@ -1,6 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-const debug = require("debug");
+const debug = require("debugf");
 const debuglog = debug('ast2MQuery');
 const chevrotain = require("chevrotain");
 const AST = require("./ast");
@@ -57,6 +57,26 @@ function makeMongoName(s) {
     return s.replace(/[^a-zA-Z0-9]/g, '_');
 }
 exports.makeMongoName = makeMongoName;
+function makeFilterObj(cat, filter) {
+    var filterObj = {};
+    filterObj[cat] = filter;
+    return filterObj;
+}
+function addFilterToMatch(res, cat, filter) {
+    if (res['$and']) {
+        res['$and'].push(makeFilterObj(cat, filter));
+        return res;
+    }
+    if (res[cat]) {
+        var filters = Object.keys(res).sort().map(key => makeFilterObj(key, res[key]));
+        filters.push(makeFilterObj(cat, filter));
+        return { $and: filters };
+    }
+    res[cat] = filter;
+    return res;
+}
+exports.addFilterToMatch = addFilterToMatch;
+;
 function makeMongoMatchFromAst(node, sentence, theModel) {
     debug(AST.astToText(node));
     //console.log("making mongo match " + AST.astToText(node));
@@ -72,16 +92,16 @@ function makeMongoMatchFromAst(node, sentence, theModel) {
         cat = makeMongoName(cat);
         var fact = getFactForNode(n.children[1], sentence);
         if (n.type === ast_1.ASTNodeType.OPEqIn) {
-            res[cat] = fact;
+            res = addFilterToMatch(res, cat, fact);
         }
         else if (n.type === ast_1.ASTNodeType.OPStartsWith) {
-            res[cat] = { $regex: new RegExp(`^${fact.toLowerCase()}`, "i") };
+            res = addFilterToMatch(res, cat, { $regex: new RegExp(`^${fact.toLowerCase()}`, "i") });
         }
         else if (n.type === ast_1.ASTNodeType.OPEndsWith) {
-            res[cat] = { $regex: new RegExp(`${fact.toLowerCase()}$`, "i") };
+            res = addFilterToMatch(res, cat, { $regex: new RegExp(`${fact.toLowerCase()}$`, "i") });
         }
         else if (n.type === ast_1.ASTNodeType.OPContains) {
-            res[cat] = { $regex: new RegExp(`${fact.toLowerCase()}`, "i") };
+            res = addFilterToMatch(res, cat, { $regex: new RegExp(`${fact.toLowerCase()}`, "i") });
         }
         else {
             throw new Error('Expected nodetype NT.OPEqIn but was ' + n.type);

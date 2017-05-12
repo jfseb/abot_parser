@@ -69,10 +69,13 @@ exports.testMakeQuerySimple = function (test) {
 
 exports.testMakeQueryStartingWith = function (test) {
   var r = mongoQ.prepareQueries('SemanticObjects, SemanticAction with SemanticObject starting with "Sup"',
+
+
     theModel);
   test.deepEqual(r.queries,
     [ { domain: 'FioriBOM',
       collectionName: 'FioriBOM',
+
       columns: [ 'SemanticObject', 'SemanticAction' ],
       reverseMap: {},
       query: [ { '$match': { SemanticObject: { $regex : /^sup/i} } },
@@ -103,6 +106,57 @@ exports.testMakeQueryStartingWith = function (test) {
           SemanticObject: { '$first': '$SemanticObject' },
           SemanticAction: { '$first': '$SemanticAction' } } },
         { '$project': { _id: 0, SemanticObject: 1, SemanticAction: 1 } } ] } ]
+  );
+  test.done();
+};
+
+
+exports.testMakeQueryDoubleConstraint = function (test) {
+  var r = mongoQ.prepareQueries('AppNAme with AppNAme starting with "Sup" AppNAme containing Obj',
+    theModel);
+  test.deepEqual(r.queries,
+    [ { domain: 'FioriBOM',
+      collectionName: 'FioriBOM',
+      columns: [ 'AppName' ],
+      reverseMap: {},
+      query:
+      [ { '$match':
+      { '$and':
+      [ { AppName: { '$regex': /^sup/i } },
+               { AppName: { '$regex': /obj/i } } ] } },
+      { '$group':
+      { _id: { AppName: '$AppName' },
+        AppName: { '$first': '$AppName' } } },
+       { '$project': { _id: 0, AppName: 1 } } ] }
+    ]);
+  test.done();
+};
+
+
+exports.testMakeQueryStartingWith2 = function (test) {
+  var r = mongoQ.prepareQueries('SemanticAction with SemanticAction starting with "Sup"',
+    theModel);
+  test.deepEqual(r.queries,
+    [ { domain: 'Fiori Backend Catalogs',
+      collectionName: 'Fiori_Backend_Catalogs',
+      columns: [ 'SemanticAction' ],
+      reverseMap: {},
+      query:
+      [ { '$match': { SemanticAction: { '$regex': /^sup/i } } },
+        { '$group':
+        { _id: { SemanticAction: '$SemanticAction' },
+          SemanticAction: { '$first': '$SemanticAction' } } },
+       { '$project': { _id: 0, SemanticAction: 1 } } ] },
+    { domain: 'FioriBOM',
+      collectionName: 'FioriBOM',
+      columns: [ 'SemanticAction' ],
+      reverseMap: {},
+      query:
+      [ { '$match': { SemanticAction: { '$regex': /^sup/i } } },
+        { '$group':
+        { _id: { SemanticAction: '$SemanticAction' },
+          SemanticAction: { '$first': '$SemanticAction' } } },
+       { '$project': { _id: 0, SemanticAction: 1 } } ] } ]
   );
   test.done();
 };
@@ -164,6 +218,60 @@ exports.testMakeQueryContaining = function (test) {
           { _id: { ArtifactId: '$ArtifactId' },
             ArtifactId: { '$first': '$ArtifactId' } } },
        { '$project': { _id: 0, ArtifactId: 1 } } ] } ]
+  );
+  test.done();
+};
+
+exports.testMakeQueryContainsFact = function (test) {
+  var r = mongoQ.prepareQueries('element names for element name containing rium 10',
+    theModel);
+  test.deepEqual(r.queries,
+    [ { domain: 'IUPAC',
+      collectionName: 'IUPAC',
+      columns: [ 'element name' ],
+      reverseMap: { element_name: 'element name' },
+      query:
+      [ { '$match': { element_name: { '$regex': /rium/i }, element_number: '10' } },
+        { '$group':
+        { _id: { element_name: '$element_name' },
+          element_name: { '$first': '$element_name' } } },
+       { '$project': { _id: 0, element_name: 1 } } ] },
+    { domain: 'IUPAC',
+      collectionName: 'IUPAC',
+      columns: [ 'element name' ],
+      reverseMap: { element_name: 'element name' },
+      query:
+      [ { '$match':
+      { '$and':
+      [ { element_number: { '$regex': /rium/i } },
+               { element_number: '10' } ] } },
+      { '$group':
+      { _id: { element_name: '$element_name' },
+        element_name: { '$first': '$element_name' } } },
+       { '$project': { _id: 0, element_name: 1 } } ] },
+    { domain: 'IUPAC',
+      collectionName: 'IUPAC',
+      columns: [ 'element number' ],
+      reverseMap: { element_number: 'element number' },
+      query:
+      [ { '$match': { element_name: { '$regex': /rium/i }, element_number: '10' } },
+        { '$group':
+        { _id: { element_number: '$element_number' },
+          element_number: { '$first': '$element_number' } } },
+       { '$project': { _id: 0, element_number: 1 } } ] },
+    { domain: 'IUPAC',
+      collectionName: 'IUPAC',
+      columns: [ 'element number' ],
+      reverseMap: { element_number: 'element number' },
+      query:
+      [ { '$match':
+      { '$and':
+      [ { element_number: { '$regex': /rium/i } },
+               { element_number: '10' } ] } },
+      { '$group':
+      { _id: { element_number: '$element_number' },
+        element_number: { '$first': '$element_number' } } },
+       { '$project': { _id: 0, element_number: 1 } } ] } ]
   );
   test.done();
 };

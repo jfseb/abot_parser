@@ -12,6 +12,7 @@ Any of the
 Less From
 At Least One
 Last
+Last for
 Starting With
 Starts with , Containing , Starts With , Equals , Ends With , Ending With ,
 Where

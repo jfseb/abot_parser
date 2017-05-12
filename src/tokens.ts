@@ -4,15 +4,15 @@
   import * as chevrotain from 'chevrotain';
     var createToken = chevrotain.createToken;
 
-    var Tall = createToken({name: "all", pattern: /all/i });
-var Ta = createToken({name: "a", pattern: /a/i });
-var TACategory = createToken({name: "ACategory", pattern: /CAT/i });
+    var TACategory = createToken({name: "ACategory", pattern: /CAT/i });
 var TADomain = createToken({name: "ADomain", pattern: /DOM/i });
 var TAFact = createToken({name: "AFact", pattern: /FACT/i });
+var Tall = createToken({name: "all", pattern: /all/i });
 var TAnANY = createToken({name: "AnANY", pattern: /AnANY/i });
 var Tand = createToken({name: "and", pattern: /and/i });
 var Tany = createToken({name: "any", pattern: /any/i });
 var Tat = createToken({name: "at", pattern: /at/i });
+var Ta = createToken({name: "a", pattern: /a/i });
 var TComma = createToken({name: "Comma", pattern: /,/i });
 var Tcontaining = createToken({name: "containing", pattern: /containing/i });
 var Tcontains = createToken({name: "contains", pattern: /contains/i });
@@ -25,6 +25,7 @@ var Tequals = createToken({name: "equals", pattern: /equals/i });
 var Tevery = createToken({name: "every", pattern: /every/i });
 var Te = createToken({name: "e", pattern: /e/i });
 var Tfirst = createToken({name: "first", pattern: /first/i });
+var Tfor = createToken({name: "for", pattern: /for/i });
 var Tfrom = createToken({name: "from", pattern: /from/i });
 var Tgreater = createToken({name: "greater", pattern: /greater/i });
 var TGT = createToken({name: "GT", pattern: />/i });
@@ -60,15 +61,15 @@ var TIdentifier = createToken({name: "Identifier", pattern: /\w+/i });
 
     
     export const Tokens = {
-   all : Tall ,
- a : Ta ,
- ACategory : TACategory ,
+   ACategory : TACategory ,
  ADomain : TADomain ,
  AFact : TAFact ,
+ all : Tall ,
  AnANY : TAnANY ,
  and : Tand ,
  any : Tany ,
  at : Tat ,
+ a : Ta ,
  Comma : TComma ,
  containing : Tcontaining ,
  contains : Tcontains ,
@@ -81,6 +82,7 @@ var TIdentifier = createToken({name: "Identifier", pattern: /\w+/i });
  every : Tevery ,
  e : Te ,
  first : Tfirst ,
+ for : Tfor ,
  from : Tfrom ,
  greater : Tgreater ,
  GT : TGT ,

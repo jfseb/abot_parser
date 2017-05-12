@@ -1,3 +1,4 @@
+
 'use strict'
 
 // based on: http://en.wikibooks.org/wiki/Algorithm_implementation/Strings/Levenshtein_distance
@@ -8,7 +9,7 @@ import * as mongoose from 'mongoose';
 
 import { ErBase as ErBase, Sentence as Sentence, IFErBase as IFErBase } from 'abot_erbase';
 
-import * as debug from 'debug';
+import * as debug from 'debugf';
 
 import * as Model from 'fdevsta_monmove';
 
@@ -65,6 +66,7 @@ export function getCategoryForNode(nodeCat : AST.ASTNode, sentence: IFErBase.ISe
   }
   throw new Error(' no startindex' + JSON.stringify(nodeCat));
 };
+
 export function getFactForNode(nodeFact : AST.ASTNode , sentence: IFErBase.ISentence) {
   var factIndex = nodeFact.bearer.startOffset;
     //console.log(JSON.stringify(sentence[factIndex], undefined, 2));
@@ -75,6 +77,25 @@ export function makeMongoName(s : string) : string {
   return s.replace(/[^a-zA-Z0-9]/g,'_');
 }
 
+function makeFilterObj(cat,filter) {
+    var filterObj = { };
+    filterObj[cat] = filter;
+    return filterObj;
+}
+
+export function addFilterToMatch(res,cat,filter) {
+  if(res['$and']) {
+    res['$and'].push(makeFilterObj(cat,filter));
+    return res;
+  }
+  if(res[cat]) {
+    var filters = Object.keys(res).sort().map(key => makeFilterObj(key,res[key]));
+    filters.push(makeFilterObj(cat,filter));
+    return { $and : filters };
+  }
+  res[cat] = filter;
+  return res;
+};
 
 export function makeMongoMatchFromAst(node : AST.ASTNode, sentence : IFErBase.ISentence, theModel: Model.IFModel.IModels) {
   debug(AST.astToText(node));
@@ -91,14 +112,14 @@ export function makeMongoMatchFromAst(node : AST.ASTNode, sentence : IFErBase.IS
     cat = makeMongoName(cat);
     var fact = getFactForNode(n.children[1], sentence);
     if (n.type === NT.OPEqIn) {
-      res[cat] = fact;
+      res = addFilterToMatch(res,cat,fact);
     } else if( n.type === NT.OPStartsWith) {
-         res[cat] = { $regex : new RegExp(`^${fact.toLowerCase()}`,"i") };
+           res = addFilterToMatch(res,cat, { $regex : new RegExp(`^${fact.toLowerCase()}`,"i") });
     } else if( n.type === NT.OPEndsWith) {
-        res[cat] = { $regex : new RegExp(`${fact.toLowerCase()}$`,"i") };
+          res = addFilterToMatch(res,cat,{ $regex : new RegExp(`${fact.toLowerCase()}$`,"i") });
     }
     else if( n.type === NT.OPContains) {
-        res[cat] = { $regex : new RegExp(`${fact.toLowerCase()}`,"i") };
+         res = addFilterToMatch(res,cat, { $regex : new RegExp(`${fact.toLowerCase()}`,"i") });
     }
     else {
       throw new Error('Expected nodetype NT.OPEqIn but was ' + n.type);

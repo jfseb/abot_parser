@@ -136,6 +136,33 @@ exports.testMakeQuery = function (test) {
   test.done();
 };
 
+<<<<<<< e9cef9064d4146ed3c6473a905ed749b25026120
+=======
+exports.testaddFilterToMatch0 = function(test) {
+  var res = mQ.addFilterToMatch({ abc : []}, 'price', 'val');
+  test.deepEqual(res,  { 'abc' : [], 'price' : 'val' });
+  test.done();
+};
+
+exports.testaddFilterToMatch1 = function(test) {
+  var res = mQ.addFilterToMatch({ $and : []}, 'price', 'val');
+  test.deepEqual(res, { $and :  [ { 'price' : 'val'}]});
+  test.done();
+};
+
+exports.testaddFilterToMatch2 = function(test) {
+  var res = mQ.addFilterToMatch({ price : '123' }, 'price', 'val');
+  test.deepEqual(res, { $and :  [ { 'price' : '123'}, { 'price' : 'val'}]});
+  test.done();
+};
+
+exports.testaddFilterToMatch3 = function(test) {
+  var res = mQ.addFilterToMatch({ price : '123' , 'other' : '445' }, 'price', 'val');
+  test.deepEqual(res, { $and :  [ { 'other' : '445' }, { 'price' : '123'},  { 'price' : 'val'}]});
+  test.done();
+};
+
+>>>>>>> abot_parser extensions
 exports.testMakeMongoReverseMapFromAst = function (test) {
   var s = 'object name';
   var r = SentenceParser.parseSentenceToAsts(s,theModel,words);

@@ -1,3 +1,4 @@
+
 'use strict'
 
 // based on: http://en.wikibooks.org/wiki/Algorithm_implementation/Strings/Levenshtein_distance
@@ -204,15 +205,20 @@ export declare const ERR_PARSE_ERROR = "PARSE_ERROR";
 
 export function parseSentenceToAsts(s : string, model : IFModel.IModels, words : any) : IParsedSentences {
   var res = ErBase.processString(s, model.rules, words);
-  debuglog('res > ' + JSON.stringify(res, undefined, 2));
+  debuglog(() =>'res > ' + JSON.stringify(res, undefined, 2));
   var res2 = Object.assign({}, res) as IParsedSentences;
   res2.asts = res.sentences.map((sentence, index) => {
     var lexingResult = getLexer().tokenize(sentence);
-    var sStrings = lexingResult.map(t => t.image);
-    debuglog('tokens: ' + index + ' ' + sStrings.join('\n'));
+    debuglog( () => {
+      var sStrings = lexingResult.map((t, indext) =>  `[${indext}] ${t.image} (${t.bearer && t.bearer.matchedString || JSON.stringify(sentence[index][t.startIndex])})` );
+      return 'tokens: #' + index + '...\n' + sStrings.join('\n');}
+    );
     //test.deepEqual(sStrings, ['CAT', 'CAT', 'CAT', 'CAT', 'with', 'CAT', 'FACT', 'CAT', 'FACT', 'FACT' ]);
     try {
       var ast = parse(lexingResult, 'catListOpMore');
+      debuglog(() => {
+        return 'ast: #' + index + '...\n' + AST.astToText(ast);
+      });
       return ast;
     } catch (e) {
       debuglog(()=> 'error  ' + JSON.stringify(e.error_obj,undefined,2));
@@ -234,3 +240,4 @@ export {
    parse
    // defaultRule : "selectStatement"
 };
+
