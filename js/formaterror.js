@@ -47,9 +47,40 @@ function getExpecting(message) {
     //  1. [AFact]
     //  2. [AnANY]
     // todo extract and format alternatives...
-    return 'a fact or a string fragment';
+    var arr = extractExpectArr(message).map(r => mapTokenStringToHumanString(r)).filter(r => !!r);
+    var res = arr.join(" or a ");
+    if (res.length) {
+        return "a " + res;
+    }
+    return undefined; // 'a fact or a string fragment';
 }
 exports.getExpecting = getExpecting;
+function mapTokenStringToHumanString(tokenstring) {
+    switch (tokenstring) {
+        case "AFact":
+            return "fact";
+        case "AnANY":
+            return "string fragment";
+    }
+    return undefined;
+}
+exports.mapTokenStringToHumanString = mapTokenStringToHumanString;
+function extractExpectArr(message) {
+    console.log(message);
+    var r = /\d+\. \[([^\]]+)\]/g;
+    var results = [];
+    var match = r.exec(message);
+    while (match != null) {
+        //console.log(' here ' + JSON.stringify(match));
+        //console.log(' here  0 ' + match[0]);
+        //console.log(' here  1 ' + match[1]);
+        //console.log(' here  2 ' + match[2]);
+        results.push(match[1]);
+        match = r.exec(message);
+    }
+    return results;
+}
+exports.extractExpectArr = extractExpectArr;
 function formatError(error, sentence) {
     debuglog(() => 'error : ' + JSON.stringify(error));
     if ((error.name === "NotAllInputParsedException") && error.token && (error.token.startOffset !== null)) {

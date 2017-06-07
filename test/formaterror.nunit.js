@@ -62,7 +62,7 @@ exports.testTokenizeCatCatCatParse = function (test) {
   test.deepEqual(sStrings, ['CAT', 'CAT', 'CAT', 'CAT', 'with', 'CAT', 'FACT', 'CAT', 'FACT', 'FACT' ]);
   var parsingResult = SentenceParser.parse(lexingResult, 'catListOpMore');
   // /test.deepEqual(parsingResult, {})
-  //console.log('here the ouptut ' + JSON.stringify(Ast.dumpNodeNice(parsingResult),undefined,2));
+  // console.log('here the ouptut ' + JSON.stringify(Ast.dumpNodeNice(parsingResult),undefined,2))
   test.deepEqual(Ast.dumpNodeNice(parsingResult),
     {
       'type': 'BINOP',
@@ -162,7 +162,7 @@ exports.testTokenizeCatCatCatParseText = function (test) {
   test.deepEqual(sStrings, ['CAT', 'CAT', 'CAT', 'CAT', 'with', 'CAT', 'FACT', 'CAT', 'FACT', 'FACT' ]);
   var parsingResult = SentenceParser.parse(lexingResult, 'catListOpMore');
   // /test.deepEqual(parsingResult, {})
- // console.log('\n' + Ast.astToText(parsingResult));
+  // console.log('\n' + Ast.astToText(parsingResult))
   test.deepEqual(Ast.astToText(parsingResult),
     'BINOP -1(2)\n  OPAll -1(1)\n    LIST -1(4)\n      CAT 0\n      CAT 1\n      CAT 2\n      CAT 3\n  LIST -1(3)\n    OPEqIn -1(2)\n      CAT 5\n      FACT 6\n    OPEqIn -1(2)\n      CAT 7\n      FACT 8\n    OPEqIn -1(2)\n      CATPH -1(0)\n      FACT 9\n'
   );
@@ -182,13 +182,13 @@ exports.testTokenizeCatCatCatErr = function (test) {
   var resErr = 'abc';
   try {
     SentenceParser.parse(lexingResult, 'catListOpMore');
-    test.equal(1,0);
+    test.equal(1, 0);
   } catch(e) {
     debuglog(e);
     resErr = FormatError.formatError(e.error_obj, res.sentences[0]);
   }
   // /test.deepEqual(parsingResult, {})
-  debuglog('\n' +resErr.text);
+  debuglog('\n' + resErr.text);
   test.deepEqual(resErr.text, 'Sentence terminated unexpectedly, i expected a fact or a string fragment.');
   test.done();
 };
@@ -211,12 +211,18 @@ exports.testTokenizeInterimErr = function (test) {
     resErr = FormatError.formatError(e.error_obj, res.sentences[0]);
   }
   // /test.deepEqual(parsingResult, {})
-  debuglog('\n' +resErr.text);
+  debuglog('\n' + resErr.text);
   test.deepEqual(resErr.text, 'I do not understand the fact "CO-FIO" at this position in the sentence.');
   test.done();
 };
 
-exports.testAbc = function(test) {
+exports.testExtractExpect = function (test) {
+  var res = FormatError.extractExpectArr(' one of these possible Token sequences:\n  1. [AFact]\n  2. [AnANY]\nbut found: \'\'');
+  test.deepEqual(res, ['AFact', 'AnANY']);
+  test.done();
+};
+
+exports.testAbc = function (test) {
   var error = [{
     'name': 'NotAllInputParsedException',
     'message': 'Redundant input, expecting EOF but found: FACT',
@@ -257,35 +263,40 @@ exports.testAbc = function(test) {
   ];
 
   var res = FormatError.formatError(error[0], sentence);
-  test.deepEqual(res.text,'I do not understand the fact "CO-FIO" at this position in the sentence.' );
+  test.deepEqual(res.text, 'I do not understand the fact "CO-FIO" at this position in the sentence.');
   test.done();
 };
-
 
 var s = `Error: NoViableAltException: Expecting: one of these possible Token sequences:
   1. [AFact]
   2. [AnANY]
 `;
 
-
-exports.testGetQualifierFromWordType = function(test) {
+exports.testGetQualifierFromWordType = function (test) {
   var res = FormatError.getExpecting(s);
   test.deepEqual(res, 'a fact or a string fragment');
   test.done();
 };
 
-exports.testGetQualifierFromWordType = function(test) {
+exports.testGetQualifierFromWordType = function (test) {
   var res = FormatError.getExpecting(s);
   test.deepEqual(res, 'a fact or a string fragment');
   test.done();
 };
 
-
-exports.testGetQualifierFromWordType = function(test) {
-  var res = ['A', 'X', 'F', 'C', 'D', '','O', undefined].map(arg => FormatError.getQualifierFromWordType(arg));
+exports.testGetQualifierFromWordType = function (test) {
+  var res = ['A', 'X', 'F', 'C', 'D', '', 'O', undefined].map(arg => FormatError.getQualifierFromWordType(arg));
   test.deepEqual(res, ['', '', 'the fact', 'the category', 'the domain', '', 'the operator', '']);
   test.done();
 };
+
+
+exports.testmapTokenStringToHumanString = function (test) {
+  var res = ['AFact', 'AnANY', '', undefined].map(arg => FormatError.mapTokenStringToHumanString(arg));
+  test.deepEqual(res, ['fact', 'string fragment', undefined, undefined]);
+  test.done();
+};
+
 var aToken = {
   'string': 'CO-FIO',
   'matchedString': 'CO-FUU',
@@ -306,8 +317,7 @@ var aToken = {
   'reinforce': 1.05
 };
 
-
-exports.testGetWordType = function(test) {
+exports.testGetWordType = function (test) {
   test.expect(3);
   test.deepEqual(FormatError.getTokenQualifier({ startOffset: 0}, [aToken]), 'the fact', 'qualifier ok');
   test.deepEqual(FormatError.getSentenceToken({ startOffset: 0}, [aToken]), aToken, 'token ok');
@@ -315,37 +325,36 @@ exports.testGetWordType = function(test) {
   test.done();
 };
 
-
-exports.testGetWordTypeBadOffset = function(test) {
+exports.testGetWordTypeBadOffset = function (test) {
   test.expect(4);
   try {
     FormatError.getTokenQualifier({ startOffset: -1}, [aToken]);
-    test.equal(1,0);
+    test.equal(1, 0);
   } catch(e) {
-    test.equal(1,1);
+    test.equal(1, 1);
   }
   try {
     FormatError.getSentenceToken({ startOffset: Number.NaN}, [aToken]);
-    test.equal(1,0);
+    test.equal(1, 0);
   } catch(e) {
-    test.equal(1,1);
+    test.equal(1, 1);
   }
   try {
     FormatError.getSentenceToken({ startOffset: 1}, [aToken]);
-    test.equal(1,0);
+    test.equal(1, 0);
   } catch(e) {
-    test.equal(1,1);
+    test.equal(1, 1);
   }
   try {
-    FormatError.getTokenText({ startOffset: 2}, [aToken,aToken]);
-    test.equal(1,0);
+    FormatError.getTokenText({ startOffset: 2}, [aToken, aToken]);
+    test.equal(1, 0);
   } catch(e) {
-    test.equal(1,1);
+    test.equal(1, 1);
   }
   test.done();
 };
 
-exports.testUnknownError = function(test) {
+exports.testUnknownError = function (test) {
   var error = [{
     'name': 'unknowntype',
     'message': 'Redundant input, expecting EOF but found: FACT',

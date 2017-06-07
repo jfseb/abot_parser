@@ -54,12 +54,43 @@ export interface IParseError {
 }
 
 export function getExpecting(message : string) : string {
-//    return "A"
-//Error: NoViableAltException: Expecting: one of these possible Token sequences:
-//  1. [AFact]
-//  2. [AnANY]
-// todo extract and format alternatives...
-return 'a fact or a string fragment';
+    //    return "A"
+    //Error: NoViableAltException: Expecting: one of these possible Token sequences:
+    //  1. [AFact]
+    //  2. [AnANY]
+    // todo extract and format alternatives...
+    var arr = extractExpectArr(message).map(r => mapTokenStringToHumanString(r)).filter(r => !!r);
+    var res = arr.join(" or a ");
+    if (res.length) {
+        return "a " + res;
+    }
+    return undefined; // 'a fact or a string fragment';
+}
+
+export function mapTokenStringToHumanString(tokenstring : string ) : string {
+    switch(tokenstring) {
+        case "AFact":
+            return "fact";
+        case "AnANY":
+            return "string fragment"
+    }
+    return undefined;
+}
+
+export function extractExpectArr(message : string) : string[] {
+    console.log(message);
+    var r = /\d+\. \[([^\]]+)\]/g;
+    var results = [];
+    var match = r.exec(message);
+    while (match != null) {
+        //console.log(' here ' + JSON.stringify(match));
+        //console.log(' here  0 ' + match[0]);
+        //console.log(' here  1 ' + match[1]);
+        //console.log(' here  2 ' + match[2]);
+        results.push(match[1]);
+        match = r.exec(message);
+    }
+    return results;
 }
 
 export function formatError(error : any, sentence : IFErBase.ISentence) : IParseError {
