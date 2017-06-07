@@ -5,13 +5,14 @@
 
 import { ErBase as ErBase, Sentence as Sentence, IFErBase as IFErBase } from 'abot_erbase';
 
-import * as debug from 'debug';
+import * as debug from 'debugf';
 
 import * as SelectParser from './parser';
 
 
 const debuglog = debug('sentenceparser');
 
+import * as FormatError from './formaterror';
 import * as chevrotain from 'chevrotain';
 import * as AST from './ast';
 
@@ -186,7 +187,10 @@ function parse(tokens : any[], startrule : string) {
   const parser = new SelectParser.SelectParser(tokens);
   var res = parser[startrule]();
    if (parser.errors.length > 0) {
-    throw new Error('parsing error in  input' + JSON.stringify(parser.errors));
+    debuglog(() => 'parsing error in  input:' + JSON.stringify(parser.errors,undefined,2));
+    var u = new Error(parser.errors[0]);
+    (u as any).error_obj = parser.errors[0];
+    throw u;
   }
   return res;
 }
@@ -211,10 +215,13 @@ export function parseSentenceToAsts(s : string, model : IFModel.IModels, words :
       var ast = parse(lexingResult, 'catListOpMore');
       return ast;
     } catch (e) {
+      debuglog(()=> 'error  ' + JSON.stringify(e.error_obj,undefined,2));
+      debuglog(()=> ' sentence : ' + Sentence.dumpNice(sentence));
+      var e2 = FormatError.formatError(e.error_obj,sentence);
       res2.errors = res2.errors || [];
       res2.errors[index] = {
         err_code : ERR_PARSE_ERROR,
-        text : e.toString()
+        text : e2.text // e.toString()
       }  as IFErBase.IERError;
     }
     return undefined;
